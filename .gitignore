@@ -1,0 +1,31 @@
+# Python系の一時ファイル
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 仮想環境（環境によってフォルダ名が違う場合があるので網羅）
+.venv
+venv/
+env/
+ENV/
+
+# VSCode, Visual Studioの設定ファイル
+.vscode/
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# 環境変数ファイル・秘密鍵（絶対にGitHubに上げない！）
+.env
+*.env
+secret_key.json
+firebase_key.json
+
+# Streamlitの一時ファイル
+.streamlit/secrets.toml
+
+# OS系
+.DS_Store
+Thumbs.db
