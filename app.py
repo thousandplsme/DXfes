@@ -163,21 +163,16 @@ with left:
 # ワイプ（常時カメラ）
 # =====================
 with right:
-    st.subheader("ワイプエリア（自分のカメラ映像）")
-
-    camera_on = st.checkbox("カメラを表示する", value=True)
-
-    if camera_on:
-        webrtc_streamer(
-            key="wipe-camera",
-            mode=WebRtcMode.SENDRECV,
-            rtc_configuration=RTCConfiguration(
-                {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
-            ),
-            media_stream_constraints={
-                "video": True,
-                "audio": False,
-            },
-        )
-    else:
-        st.info("カメラはオフになっています")
+    st.markdown("### ワイプエリア（自分のカメラ映像）")
+    
+    webrtc_streamer(
+        key="wipe-camera",
+        mode=WebRtcMode.SENDRECV,
+        rtc_configuration=RTCConfiguration(
+            {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+        ),
+        media_stream_constraints={
+            "video": True,
+            "audio": False,
+        },
+    )
