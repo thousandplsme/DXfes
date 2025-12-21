@@ -1,11 +1,12 @@
 import streamlit as st
 import firebase_admin
 from firebase_admin import credentials, firestore
-import pandas as pd
 import time
 import os
 
-# 1. Firebase初期化（db.pyと同じロジック）
+st.set_page_config(page_title="管理者ダッシュボード", layout="wide")
+
+# Firebase初期化 (db.pyと同様)
 key_path = 'secret_key.json'
 if not firebase_admin._apps:
     if os.path.exists(key_path):
@@ -14,42 +15,57 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
-# 2. 画面構築
-st.set_page_config(page_title="管理者ダッシュボード", layout="wide")
-st.title("🏫 リアルタイム集中状況モニター")
+st.title("🏫 Focus Garden - リアルタイム見守りシステム")
+st.markdown("クラス全員の集中状況を可視化しています（画像は保存されていません）")
 
-# 3. データ取得と表示のループ
+# 自動更新のコンテナ
 placeholder = st.empty()
 
 while True:
-    # Firestoreからデータを取得
-    docs = db.collection('contest_room').stream()
-    data_list = []
-    
-    for doc in docs:
-        d = doc.to_dict()
-        d['user_name'] = doc.id # ドキュメントIDを名前にする
-        data_list.append(d)
-    
-    with placeholder.container():
-        if not data_list:
-            st.info("データ待機中...")
-        else:
-            # カラムに分けてカード形式で表示
-            cols = st.columns(4) # 4列で表示
-            for i, student in enumerate(data_list):
-                col = cols[i % 4]
-                with col:
-                    # スコアに応じて色を変える演出
-                    score = student.get('score', 0)
-                    mode = student.get('mode', 'Flower')
-                    bg_color = "🟢" if score > 70 else "🟡" if score > 40 else "🔴"
-                    
-                    st.metric(
-                        label=f"{bg_color} {student['user_name']}",
-                        value=f"{score}点",
-                        delta=mode
-                    )
-                    st.progress(score)
-    
-    time.sleep(2) # 2秒更新
+    try:
+        # Firestoreから全データ取得
+        docs = db.collection('contest_room').stream()
+        data_list = []
+        for doc in docs:
+            d = doc.to_dict()
+            d['user_name'] = doc.id
+            data_list.append(d)
+        
+        with placeholder.container():
+            if not data_list:
+                st.warning("現在、接続している生徒はいません。")
+            else:
+                # 3列でカード表示
+                cols = st.columns(3)
+                for i, student in enumerate(data_list):
+                    col = cols[i % 3]
+                    with col:
+                        score = student.get('score', 0)
+                        mode = student.get('mode', 'Unknown')
+                        
+                        # スコアに応じた装飾
+                        if score > 80:
+                            status_icon = "🌸" if mode == "Flower" else "🏰"
+                            color = "green"
+                        elif score > 40:
+                            status_icon = "🌿" if mode == "Flower" else "📚"
+                            color = "orange"
+                        else:
+                            status_icon = "🥀" if mode == "Flower" else "💤"
+                            color = "red"
+
+                        # カード風の表示
+                        st.markdown(f"""
+                        <div style="border: 2px solid {color}; padding: 10px; border-radius: 10px; margin-bottom: 10px;">
+                            <h3>{status_icon} {student['user_name']}</h3>
+                            <p>Mode: <b>{mode}</b></p>
+                            <h2 style="color: {color};">{score}点</h2>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        st.progress(score)
+                        
+        time.sleep(2) # 2秒ごとに更新
+        
+    except Exception as e:
+        st.error(f"データ取得エラー: {e}")
+        time.sleep(5)
