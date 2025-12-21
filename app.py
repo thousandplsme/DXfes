@@ -7,7 +7,7 @@ import os
 # ページ設定
 # =====================
 st.set_page_config(
-    page_title="Focus Garden",
+    page_title="AttenCheck",
     layout="wide"
 )
 
@@ -54,7 +54,7 @@ st.markdown(
 header_left, header_right = st.columns([8, 1])
 
 with header_left:
-    st.title("Focus Garden")
+    st.title("AttenCheck")
 
 with header_right:
     if st.button("⚙ 設定"):
@@ -64,26 +64,23 @@ with header_right:
 # 設定パネル（画面内）
 # =====================
 if st.session_state.show_settings:
-    st.markdown('<div class="settings-box">', unsafe_allow_html=True)
     st.markdown("### ⚙ 設定")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        st.session_state.mode = st.radio(
+        st.radio(
             "画像テーマ",
             ("花モード", "本モード"),
-            index=0 if st.session_state.mode == "花モード" else 1
+            key="mode"
         )
 
     with col2:
-        st.session_state.score = st.slider(
+        st.slider(
             "集中スコア",
             0, 100,
-            st.session_state.score
+            key="score"
         )
-
-    st.markdown('</div>', unsafe_allow_html=True)
 
 st.divider()
 
@@ -115,12 +112,24 @@ base_folder = get_base_folder(mode)
 image_path = get_image_by_score(score, base_folder)
 
 # =====================
+# 画像処理
+# =====================
+def load_image_no_alpha(path, bg_color=(255, 255, 255)):
+    img = Image.open(path)
+
+    # 透過PNGの場合
+    if img.mode in ("RGBA", "LA"):
+        background = Image.new("RGB", img.size, bg_color)
+        background.paste(img, mask=img.split()[-1])  # alphaをマスクに使う
+        return background
+    else:
+        return img
+
+# =====================
 # メインビジュアル
 # =====================
-st.subheader("メインビジュアルエリア")
-
 if os.path.exists(image_path):
-    image = Image.open(image_path)
+    image = load_image_no_alpha(image_path)
     st.image(image, use_container_width=True)
 else:
     st.error("画像ファイルが見つかりません")
@@ -146,7 +155,7 @@ left, right = st.columns(2)
 
 # メッセージエリア
 with left:
-    st.subheader("メッセージエリア")
+    st.subheader("メッセージ")
 
     if score < 20:
         st.warning("画面から少し意識が離れているかもしれません。背筋を伸ばして、授業に目を向けてみましょう。")
@@ -163,7 +172,6 @@ with left:
 # ワイプ（常時カメラ）
 # =====================
 with right:
-    st.markdown("### ワイプエリア（自分のカメラ映像）")
     
     webrtc_streamer(
         key="wipe-camera",
