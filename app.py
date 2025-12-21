@@ -75,12 +75,14 @@ if st.session_state.show_settings:
             key="mode"
         )
 
+# -------------------メーター処理---------------
     with col2:
         st.slider(
             "集中スコア",
             0, 100,
             key="score"
         )
+# ---------------------------------------------
 
 st.divider()
 
@@ -172,7 +174,7 @@ with left:
 # ワイプ（常時カメラ）
 # =====================
 with right:
-    
+
     webrtc_streamer(
         key="wipe-camera",
         mode=WebRtcMode.SENDRECV,
