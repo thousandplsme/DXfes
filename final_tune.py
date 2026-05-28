@@ -311,8 +311,8 @@ class SimpleConcentrationDetector:
         return yaw, pitch, roll
 
 # --- 2. ここから画面表示 (Streamlit) ---
-st.title("🛠 高精度・最終調整モード")
-st.markdown("Yaw(ひねり)とRoll(傾き)に対応しました。")
+st.title("🛠 カメラ判定モード")
+st.markdown("Yaw(ひねり)とRoll(傾き)にも対応。")
 
 st.sidebar.header("許容範囲の設定 (Safe Zone)")
 ear_th = st.sidebar.slider("目閉じ判定 (EAR Threshold)", 0.15, 0.35, 0.22, 0.01)

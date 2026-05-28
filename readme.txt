@@ -29,3 +29,5 @@ VSCodeのターミナルの右上にある「＋」の横の 「ｖ（下矢印�
 .venv\Scripts\activate.bat
 
 streamlit run final_tune.py
+
+tune_ai.pyはきちんと動く
